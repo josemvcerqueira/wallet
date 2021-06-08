@@ -1,0 +1,15 @@
+{
+	"space": true,
+  "ignores": ["migrations", "truffle-config.js"],
+  "rules": {
+    "jest/no-disabled-tests": "warn",
+    "jest/no-focused-tests": "error",
+    "jest/no-identical-title": "error",
+    "jest/prefer-to-have-length": "warn",
+    "jest/valid-expect": "error",
+    "unicorn/prefer-module": "warn",
+    "jest/no-focused-tests" : "warn"
+  },
+  "extends": ["plugin:jest/recommended"],
+  "plugins": ["jest"]
+}
