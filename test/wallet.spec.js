@@ -3,6 +3,7 @@ const {accounts, contract, web3} = require('@openzeppelin/test-environment');
 const {
   expectRevert
 } = require('@openzeppelin/test-helpers');
+
 const Wallet = contract.fromArtifact('Wallet');
 
 const [owner, wallet1, wallet2, wallet3, wallet4] = accounts;
@@ -42,7 +43,7 @@ describe('Wallet', () => {
     await expectRevert(wallet.createTransfer(5000, wallet4, {from: owner}), 'only approvers are allowed');
   });
 
-  it.only('should increment approval', async () => {
+  it('should increment approval', async () => {
     await wallet.createTransfer(1000, wallet4, {from: wallet1});
     await wallet.approveTransfer(0, {from: wallet1});
     const transfers = await wallet.getTransfers();
@@ -51,11 +52,39 @@ describe('Wallet', () => {
 
     const balance = await web3.eth.getBalance(wallet.address);
 
-    expect(balance).toBe("10000");
+    expect(balance).toBe('10000');
     expect(firstTransfer[0]).toBe('0');
     expect(firstTransfer[1]).toBe('1000');
     expect(firstTransfer[2]).toBe(wallet4);
     expect(firstTransfer[3]).toBe('1');
     expect(firstTransfer[4]).toBeFalsy();
+  });
+
+  it('should sent transfer if quorum is reached', async () => {
+    const balanceBefore = web3.utils.toBN(await web3.eth.getBalance(wallet4));
+    await wallet.createTransfer(5000, wallet4, {from: wallet1});
+    await wallet.approveTransfer(0, {from: wallet1});
+    await wallet.approveTransfer(0, {from: wallet2});
+    const balanceAfter = web3.utils.toBN(await web3.eth.getBalance(wallet4));
+
+    expect(balanceAfter.sub(balanceBefore).toNumber()).toBe(5000);
+  });
+
+  it('should not approve transfer is sender is not approved', async () => {
+    await wallet.createTransfer(1000, wallet4, {from: wallet1});
+    await expectRevert(wallet.approveTransfer(0, {from: owner}), 'only approvers are allowed');
+  });
+
+  it('should not approve transfer if transfer is already sent', async () => {
+    await wallet.createTransfer(5000, wallet4, {from: wallet1});
+    await wallet.approveTransfer(0, {from: wallet1});
+    await wallet.approveTransfer(0, {from: wallet2});
+    await expectRevert(wallet.approveTransfer(0, {from: wallet3}), 'transfer has already been sent');
+  });
+
+  it('should not approve transfer twice', async () => {
+    await wallet.createTransfer(5000, wallet4, {from: wallet1});
+    await wallet.approveTransfer(0, {from: wallet1});
+    await expectRevert(wallet.approveTransfer(0, {from: wallet1}), 'cannot approve a transfer that has already been approved');
   });
 });
