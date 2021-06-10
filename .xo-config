@@ -8,8 +8,10 @@
     "jest/prefer-to-have-length": "warn",
     "jest/valid-expect": "error",
     "unicorn/prefer-module": "warn",
-    "jest/no-focused-tests" : "warn"
+    "jest/no-focused-tests" : "warn",
+    "react/prop-types": "warn"
   },
-  "extends": ["plugin:jest/recommended"],
-  "plugins": ["jest"]
+  "extends": ["plugin:jest/recommended", "xo-react"],
+  "plugins": ["jest"],
+  "globals": ["document"]
 }
