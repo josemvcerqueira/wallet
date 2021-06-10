@@ -13,5 +13,5 @@
   },
   "extends": ["plugin:jest/recommended", "xo-react"],
   "plugins": ["jest"],
-  "globals": ["document"]
+  "globals": ["document", "window"]
 }
